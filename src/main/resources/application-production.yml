@@ -1,0 +1,19 @@
+spring:
+  profiles: production
+  redis:
+    host: 172.16.105.145
+    port: 6379
+  kafka:
+    bootstrap-servers: 172.16.105.145:9092
+
+server:
+  port: 8099
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://discoveryservice.dev.saas.dyrs.online/eureka
+logging:
+  path: /data/logs
+  pattern:
+    level: INFO

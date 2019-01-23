@@ -1,0 +1,43 @@
+spring:
+  profiles:
+    active: dev
+  application:
+    name: com-kafka
+  redis:
+    pool:
+      max-idle: 100
+      min-idle: 1
+      max-active: 1000
+      max-wait: -1
+  kafka:
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.ByteArraySerializer
+    consumer:
+      group-id: kafkaStreamGroup
+      auto-offset-reset: earliest
+      enable-auto-commit: true
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.ByteArrayDeserializer
+    listener:
+      poll-timeout: 6000
+      concurrency:
+
+eureka:
+ client:
+    registerWithEureka: true
+    fetchRegistry: true
+ instance:
+   prefer-ip-address: true
+
+hystrix:
+  command:
+    default:
+      execution:
+        isolation:
+          thread:
+            timeoutInMilliseconds: 10000
+ribbon:
+  ConnectTimeout: 100000
+  ReadTimeout: 100000
+

@@ -22,7 +22,6 @@ public class KafkaStreamController {
     @RequestMapping(value="/send")
     public String send(String name) {
         try{
-            System.out.println("aa");
             kafkaTemplate.send("streams-plaintext-input",name.getBytes("utf-8"));
         }catch (Exception e){
             e.printStackTrace();

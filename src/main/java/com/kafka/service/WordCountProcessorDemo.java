@@ -14,6 +14,7 @@ import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
@@ -23,6 +24,7 @@ import java.util.Properties;
 import java.util.concurrent.CountDownLatch;
 
 /**
+ * 低级别处理器API
  * Created by Administrator on 2018/7/17.
  * 字数统计
  */
@@ -36,7 +38,9 @@ public class WordCountProcessorDemo implements ApplicationRunner {
     @Value("${spring.kafka.bootstrap-servers}")
     private String DEFAULT_BOOTSTRAP_SERVERS;
 
-
+    /**
+     * 处理器
+     */
     private static class MyProcessorSupplier
             implements ProcessorSupplier<String, String>
     {
@@ -100,6 +104,7 @@ public class WordCountProcessorDemo implements ApplicationRunner {
 
                 /**
                  * 处理逻辑
+                 * 每个接收一个记录，将字符串的值分割成单词，并更新他们的数量到状态存储
                  * @param dummy
                  * @param line
                  */
@@ -118,6 +123,10 @@ public class WordCountProcessorDemo implements ApplicationRunner {
                     this.context.commit();
                 }
 
+                /**
+                 * 迭代本地状态仓库并发送总量数到下游的处理器，并提交当前的流状态
+                 * @param timestamp
+                 */
                 @Override
                 public void punctuate(long timestamp) {
                 }
@@ -142,7 +151,13 @@ public class WordCountProcessorDemo implements ApplicationRunner {
         Topology builder = new Topology();
         builder.addSource("Source", new String[] { "streams-plaintext-input" });//输入源
         builder.addProcessor("Process", new MyProcessorSupplier(), new String[] { "Source" });//执行器
-        builder.addStateStore(Stores.keyValueStoreBuilder(Stores.inMemoryKeyValueStore("Counts"), Serdes.String(), Serdes.Integer()), new String[] { "Process" });//存储
+        builder.addStateStore(
+                Stores.keyValueStoreBuilder(
+                        Stores.persistentKeyValueStore("Counts"),
+                        Serdes.String(),
+                        Serdes.Integer()
+                ),
+                new String[] { "Process" });//存储
         builder.addSink("Sink", "streams-wordcount-processor-output", new String[] { "Process" });//输出
 
         final KafkaStreams streams = new KafkaStreams(builder, props);
@@ -165,6 +180,15 @@ public class WordCountProcessorDemo implements ApplicationRunner {
         catch (Throwable e)
         {
             e.printStackTrace();
+        }
+    }
+
+    public static void main(String[] args) {
+        Object object = "";
+        if(!StringUtils.isEmpty(object)){
+            System.out.println("1");
+        }else {
+            System.out.println("2");
         }
     }
 }

@@ -18,9 +18,9 @@ import java.util.Arrays;
 import java.util.Properties;
 
 /**
+ * 高级别Streams DSL
  * Created by Administrator on 2018/7/16.
  */
-
 //@Component
 public class KafkaStreamInit implements CommandLineRunner {
 
@@ -43,7 +43,7 @@ public class KafkaStreamInit implements CommandLineRunner {
                 .flatMapValues(textLine -> Arrays.asList(textLine.toLowerCase().split("\\W+")))
                 .groupBy((key, word) -> word)
                 .count(Materialized.<String, Long, KeyValueStore<Bytes, byte[]>>as("counts-store"));
-        wordCounts.toStream().to("WordsWithCountsTopic1", Produced.with(Serdes.String(), Serdes.Long()));
+        wordCounts.toStream().to("WordsWithCountsTopic", Produced.with(Serdes.String(), Serdes.Long()));
         KafkaStreams streams = new KafkaStreams(builder.build(), config);
         streams.start();
 
